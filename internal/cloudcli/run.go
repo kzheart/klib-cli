@@ -49,8 +49,11 @@ func run(ctx context.Context, args []string, in io.Reader, out io.Writer, creden
 	if len(args) == 1 && (args[0] == "version" || args[0] == "--version") {
 		return json.NewEncoder(out).Encode(map[string]any{"name": "klib", "version": Version, "commit": Commit, "protocol_version": ProtocolVersion})
 	}
+	if len(args) > 0 && args[0] == "docs" {
+		return docsCommand(ctx, args[1:], out)
+	}
 	if len(args) == 1 && args[0] == "schema" {
-		return json.NewEncoder(out).Encode(map[string]any{"name": "klib", "schema_version": 1, "output": "json", "commands": []string{"version", "auth login --endpoint URL --key-stdin", "account", "products list [--cursor CURSOR] [--limit N]", "products get --product ID", "products create --product ID --name NAME [--summary TEXT]", "entitlements list", "entitlements own --product ID", "deployments list", "deployments get --deployment ID", "deployments create --file JSON", "deployments select --deployment ID --file JSON", "deployments revoke --deployment ID --revision N", "enrollments issue --deployment ID --revision N --output FILE", "instances connect --deployment ID --output CONFIG_YML", "instances list --deployment ID", "instances revoke --deployment ID --instance ID", "builds list --product ID", "builds upload --product ID --file JAR", "releases create --build ID --entitlement ID --version VERSION --channel beta|stable"}})
+		return json.NewEncoder(out).Encode(map[string]any{"name": "klib", "schema_version": 1, "output": "json", "commands": []string{"version", "docs list [--repo OWNER/REPO]", "docs search QUERY [--repo OWNER/REPO] [--limit N]", "docs read PAGE [--repo OWNER/REPO]", "auth login --endpoint URL --key-stdin", "account", "products list [--cursor CURSOR] [--limit N]", "products get --product ID", "products create --product ID --name NAME [--summary TEXT]", "entitlements list", "entitlements own --product ID", "deployments list", "deployments get --deployment ID", "deployments create --file JSON", "deployments select --deployment ID --file JSON", "deployments revoke --deployment ID --revision N", "enrollments issue --deployment ID --revision N --output FILE", "instances connect --deployment ID --output CONFIG_YML", "instances list --deployment ID", "instances revoke --deployment ID --instance ID", "builds list --product ID", "builds upload --product ID --file JAR", "releases create --build ID --entitlement ID --version VERSION --channel beta|stable"}})
 	}
 	if len(args) == 0 {
 		return errors.New("请执行 klib schema 查看命令")

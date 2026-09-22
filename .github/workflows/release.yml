@@ -81,8 +81,9 @@ jobs:
           cat > build/release-notes.md <<'NOTES'
           独立 CLI 源码由本仓库 CI 构建；三平台安装与损坏下载回归通过后，发布同一批资产。
 
-          安装命令见 README。需要配套 v5 Collector 和 KlibGuard；正式授权服务尚未完成切换。
-          Skill 独立安装，不包含 mc-pilot。
+          新增无需登录的 Wiki 目录、全文搜索与页面读取命令，教程实时来自官方 GitHub Wiki。
+          新增独立 klib-development Skill，现有 klib-cloud-development 继续负责云端交付。
+          安装命令见 README。云端命令需要配套 v5 Collector 和 KlibGuard；两个 Skill 均不包含或强制依赖 mc-pilot。
           NOTES
           gh release create "$GITHUB_REF_NAME" build/assets/* --verify-tag --prerelease \
             --title "Klib CLI $(cat VERSION)" --notes-file build/release-notes.md

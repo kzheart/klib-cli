@@ -36,9 +36,9 @@ def build(output, repo, allow_dirty=False):
         shutil.copyfile(ROOT / name, public / name)
     readme = (ROOT / "README.md").read_text().replace("@VERSION@", version).replace("@REPO@", repo)
     (public / "README.md").write_text(readme)
-    skill = public / "skills/klib-cloud-development"
-    skill.mkdir(parents=True)
-    shutil.copyfile(ROOT / "skills/klib-cloud-development/SKILL.md", skill / "SKILL.md")
+    skill_names = ("klib-development", "klib-cloud-development")
+    for name in skill_names:
+        shutil.copytree(ROOT / "skills" / name, public / "skills" / name)
     docs = public / "docs"
     docs.mkdir()
     source_doc = (ROOT / "docs/cli-development.md").read_text()
@@ -63,8 +63,11 @@ def build(output, repo, allow_dirty=False):
         subprocess.run(["go", "build", "-trimpath", "-buildvcs=true", "-ldflags", f"-s -w -X {package}.Version={version} -X {package}.Commit={commit}", "-o", str(assets / name), "./cmd/klib"], cwd=backend, env=env, check=True)
     for name in ("install.sh", "install.ps1", "LICENSE", "THIRD_PARTY_NOTICES.md"):
         shutil.copyfile(public / name, assets / name)
-    with zipfile.ZipFile(assets / "klib-cloud-development.zip", "w", zipfile.ZIP_DEFLATED) as archive:
-        archive.write(skill / "SKILL.md", "klib-cloud-development/SKILL.md")
+    for name in skill_names:
+        with zipfile.ZipFile(assets / f"{name}.zip", "w", zipfile.ZIP_DEFLATED) as archive:
+            for path in sorted((public / "skills" / name).rglob("*")):
+                if path.is_file():
+                    archive.write(path, str(path.relative_to(public / "skills")))
     with zipfile.ZipFile(assets / "third-party-licenses.zip", "w", zipfile.ZIP_DEFLATED) as archive:
         for path in sorted(licenses.iterdir()):
             archive.write(path, f"LICENSES/{path.name}")

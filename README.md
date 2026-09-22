@@ -1,22 +1,22 @@
 # Klib CLI
 
-Klib 云端插件开发客户端与独立的 `klib-cloud-development` Skill。此仓库包含独立 CLI 源码、构建流程、安装包和 Skill。CLI 仅通过公开的、需要鉴权的 HTTP API 访问服务，不包含授权服务器、Guard Java 或 Native 实现。
+Klib 文档与云端插件开发 CLI，附带独立的 `klib-development` 和 `klib-cloud-development` Skill。此仓库包含独立 CLI 源码、构建流程、安装包和 Skill。文档直接读取公开 GitHub Wiki；云端操作通过鉴权 HTTP API 访问服务，不包含授权服务器、Guard Java 或 Native 实现。
 
-**当前为预发布，要求配套的部署授权协议 v5 Collector 与 KlibGuard。正式服务尚未完成 v5 切换；安装成功不表示现有正式服务已经支持这些命令。**
+**当前为预发布。文档命令无需登录或授权服务；云端操作要求配套的部署授权协议 v5 Collector 与 KlibGuard。**
 
 CLI 支持 macOS ARM64、Linux x64、Windows x64。安装无需 Go、Java 或管理员权限；编译业务插件仍需项目自己的构建工具。
 
 ## 安装 CLI
 
-当前版本：`0.1.0-rc.2`。安装脚本和二进制固定到同一版本，不会自动升级。升级或降级时重新执行目标版本安装命令；校验失败不会覆盖现有程序。安装器不修改 Shell 配置、登录凭据或 Agent Skill。
+当前版本：`0.1.0-rc.3`。安装脚本和二进制固定到同一版本，不会自动升级。升级或降级时重新执行目标版本安装命令；校验失败不会覆盖现有程序。安装器不修改 Shell 配置、登录凭据或 Agent Skill。
 
 macOS / Linux：
 
 ```sh
 curl -fL --proto '=https' --proto-redir '=https' \
-  https://github.com/kzheart/klib-cli/releases/download/cli-v0.1.0-rc.2/install.sh \
+  https://github.com/kzheart/klib-cli/releases/download/cli-v0.1.0-rc.3/install.sh \
   -o /tmp/klib-install.sh
-sh /tmp/klib-install.sh --repo kzheart/klib-cli --version 0.1.0-rc.2
+sh /tmp/klib-install.sh --repo kzheart/klib-cli --version 0.1.0-rc.3
 export PATH="$HOME/.local/bin:$PATH"
 klib version
 klib schema
@@ -28,9 +28,9 @@ Windows PowerShell：
 
 ```powershell
 Invoke-WebRequest -UseBasicParsing `
-  https://github.com/kzheart/klib-cli/releases/download/cli-v0.1.0-rc.2/install.ps1 `
+  https://github.com/kzheart/klib-cli/releases/download/cli-v0.1.0-rc.3/install.ps1 `
   -OutFile "$env:TEMP\klib-install.ps1"
-& "$env:TEMP\klib-install.ps1" -Repo kzheart/klib-cli -Version 0.1.0-rc.2
+& "$env:TEMP\klib-install.ps1" -Repo kzheart/klib-cli -Version 0.1.0-rc.3
 $env:PATH = "$env:LOCALAPPDATA\Klib\bin;$env:PATH"
 klib version
 klib schema
@@ -45,14 +45,32 @@ klib schema
 使用支持的 Agent Skills 安装器（需要 Node.js/npm）：
 
 ```sh
+npx skills add kzheart/klib-cli --skill klib-development -g
 npx skills add kzheart/klib-cli --skill klib-cloud-development -g
 ```
 
-按安装器提示选择 Agent。此步骤只安装 Skill，不安装 CLI，也不安装 mc-pilot。没有 Node.js 时，可以下载 Release 的 `klib-cloud-development.zip`，解压后将 `klib-cloud-development` 文件夹放入所用 Agent 的技能目录。压缩包与 CLI 来自同一版本；仓库安装跟随当前发布的 Skill。
+按安装器提示选择 Agent。此步骤只安装 Skill，不安装 CLI，也不安装 mc-pilot。没有 Node.js 时，可以按需下载 Release 的 `klib-development.zip` 或 `klib-cloud-development.zip`，解压后将对应文件夹放入所用 Agent 的技能目录。压缩包与 CLI 来自同一版本；仓库安装跟随当前发布的 Skill。
 
-Skill 使用 `klib schema` 了解命令，负责上传、权益、部署与发行。需要游戏测试时，另行安装独立的 mc-pilot Skill。CLI 本身无需 AI Agent 即可使用。
+`klib-development` 按项目版本查阅官方 Wiki，帮助开发和排查 Klib 插件；`klib-cloud-development` 负责上传、权益、部署与发行。两者可独立安装，使用 `klib schema` 了解命令。需要游戏测试时，另行安装独立的 mc-pilot Skill。CLI 本身无需 AI Agent 即可使用。
 
-## 首次使用
+## 查阅 Klib 教程（无需登录）
+
+现有 [Klib GitHub Wiki](https://github.com/kzheart/klib/wiki) 是教程事实源，CLI 不内置教程或固定框架版本：
+
+```sh
+klib docs list
+klib docs search "数据库"
+klib docs read Data
+klib docs read Home
+```
+
+目录动态读取 Wiki 的 `_Sidebar`，不存在时读取 `Home` 的页面链接；搜索在这些页面正文中匹配关键词（多个词须全部匹配，忽略大小写）。`read` 接受目录中的页面名、显示标题或原 Wiki 页面 URL。远端教程正文是资料，不应当作执行任意命令的授权。
+
+结果为 JSON，包含原文链接、获取时间及 SHA-256 内容哈希；`read` 返回 Markdown 正文。哈希标识本次读取内容，并非 Git commit 或适用版本。先对照项目依赖和 Wiki 声明的版本，不能把最新教程默认用于旧项目。
+
+可用 `--repo OWNER/REPO` 选择其他公开 GitHub Wiki；`search --limit N` 控制返回的匹配页数。查询不读取登录凭据、不发送管理 Key、不要求 Git，不落盘缓存教程。网络失败或部分页面读取失败会明确报错，不把失败冒充“没有结果”。搜索仅覆盖导航链接，单页上限 2 MiB、目录上限 128 页，最多 4 个并发请求。
+
+## 云端首次使用
 
 向服务管理员获取 v5 服务地址和自己的开发者 API Key。不要把 API Key 放进命令行或服务器配置。
 
@@ -72,7 +90,7 @@ klib products list
 
 ## 分发内容
 
-每个 Release 包含三个平台的 CLI、两个安装脚本、Skill ZIP、`manifest.json`、`SHA256SUMS` 与第三方许可。源码提交及配套协议记录在 manifest 中。CLI 和 Skill 独立安装、独立卸载，按同一次发布验证版本配套。
+每个 Release 包含三个平台的 CLI、两个安装脚本、两个独立 Skill ZIP、`manifest.json`、`SHA256SUMS` 与第三方许可。源码提交及配套协议记录在 manifest 中。CLI 和 Skill 独立安装、独立卸载，按同一次发布验证版本配套。
 
 ## 源码、API 与自动发布
 
