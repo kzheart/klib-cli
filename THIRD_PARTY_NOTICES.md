@@ -1,3 +1,3 @@
 # Third-party notices
 
-The CLI includes the Go runtime and github.com/go-chi/chi/v5. Their license texts are in LICENSES.
+The CLI uses the Go standard library and runtime. See LICENSES/Go.txt.

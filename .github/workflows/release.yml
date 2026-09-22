@@ -1,0 +1,88 @@
+name: CLI build and release
+on:
+  push:
+    branches: [main]
+    tags: ['cli-v*']
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: cli-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Test independent client and verify tag
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            test "${GITHUB_REF#refs/tags/}" = "cli-v$(cat VERSION)"
+          fi
+          go test ./...
+          go vet ./...
+      - name: Build release binaries from this repository
+        run: python scripts/build.py --output build/distribution --repo kzheart/klib-cli
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cli-distribution
+          path: build/distribution/assets/
+          if-no-files-found: error
+  install-test:
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-14, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - uses: actions/download-artifact@v4
+        with:
+          name: cli-distribution
+          path: build/assets
+      - run: python scripts/tests/test_cli_install.py --assets build/assets
+      - if: runner.os == 'Windows'
+        run: python scripts/tests/test_cli_install.py --assets build/assets --powershell powershell
+  release:
+    if: startsWith(github.ref, 'refs/tags/cli-v')
+    needs: [build, install-test]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: cli-distribution
+          path: build/assets
+      - name: Verify tested assets
+        working-directory: build/assets
+        run: sha256sum -c SHA256SUMS
+      - name: Publish Release with this repository's token
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > build/release-notes.md <<'NOTES'
+          独立 CLI 源码由本仓库 CI 构建；三平台安装与损坏下载回归通过后，发布同一批资产。
+
+          安装命令见 README。需要配套 v5 Collector 和 KlibGuard；正式授权服务尚未完成切换。
+          Skill 独立安装，不包含 mc-pilot。
+          NOTES
+          gh release create "$GITHUB_REF_NAME" build/assets/* --verify-tag --prerelease \
+            --title "Klib CLI $(cat VERSION)" --notes-file build/release-notes.md

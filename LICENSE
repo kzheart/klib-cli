@@ -1,8 +1,8 @@
 Copyright (c) 2026 kzheart. All rights reserved.
 
 Permission is granted to download, install and use the distributed Klib CLI,
-installation scripts, and klib-cloud-development Skill to interact with Klib
-services. This distribution does not grant access to, or a license for, the
+source code, installation scripts, and klib-cloud-development Skill to interact with Klib
+services. Permission is also granted to inspect and build this CLI source code. This distribution does not grant access to, or a license for, the
 private Klib Guard or server source code. All other rights are reserved.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR

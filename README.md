@@ -1,6 +1,6 @@
 # Klib CLI
 
-Klib 云端插件开发客户端与独立的 `klib-cloud-development` Skill。此仓库只分发安装包、Skill 和使用文档，不包含授权服务器、Guard Java 或 Native 实现。
+Klib 云端插件开发客户端与独立的 `klib-cloud-development` Skill。此仓库包含独立 CLI 源码、构建流程、安装包和 Skill。CLI 仅通过公开的、需要鉴权的 HTTP API 访问服务，不包含授权服务器、Guard Java 或 Native 实现。
 
 **当前为预发布，要求配套的部署授权协议 v5 Collector 与 KlibGuard。正式服务尚未完成 v5 切换；安装成功不表示现有正式服务已经支持这些命令。**
 
@@ -8,15 +8,15 @@ CLI 支持 macOS ARM64、Linux x64、Windows x64。安装无需 Go、Java 或管
 
 ## 安装 CLI
 
-当前版本：`0.1.0-rc.1`。安装脚本和二进制固定到同一版本，不会自动升级。升级或降级时重新执行目标版本安装命令；校验失败不会覆盖现有程序。安装器不修改 Shell 配置、登录凭据或 Agent Skill。
+当前版本：`0.1.0-rc.2`。安装脚本和二进制固定到同一版本，不会自动升级。升级或降级时重新执行目标版本安装命令；校验失败不会覆盖现有程序。安装器不修改 Shell 配置、登录凭据或 Agent Skill。
 
 macOS / Linux：
 
 ```sh
 curl -fL --proto '=https' --proto-redir '=https' \
-  https://github.com/kzheart/klib-cli/releases/download/cli-v0.1.0-rc.1/install.sh \
+  https://github.com/kzheart/klib-cli/releases/download/cli-v0.1.0-rc.2/install.sh \
   -o /tmp/klib-install.sh
-sh /tmp/klib-install.sh --repo kzheart/klib-cli --version 0.1.0-rc.1
+sh /tmp/klib-install.sh --repo kzheart/klib-cli --version 0.1.0-rc.2
 export PATH="$HOME/.local/bin:$PATH"
 klib version
 klib schema
@@ -28,9 +28,9 @@ Windows PowerShell：
 
 ```powershell
 Invoke-WebRequest -UseBasicParsing `
-  https://github.com/kzheart/klib-cli/releases/download/cli-v0.1.0-rc.1/install.ps1 `
+  https://github.com/kzheart/klib-cli/releases/download/cli-v0.1.0-rc.2/install.ps1 `
   -OutFile "$env:TEMP\klib-install.ps1"
-& "$env:TEMP\klib-install.ps1" -Repo kzheart/klib-cli -Version 0.1.0-rc.1
+& "$env:TEMP\klib-install.ps1" -Repo kzheart/klib-cli -Version 0.1.0-rc.2
 $env:PATH = "$env:LOCALAPPDATA\Klib\bin;$env:PATH"
 klib version
 klib schema
@@ -73,3 +73,16 @@ klib products list
 ## 分发内容
 
 每个 Release 包含三个平台的 CLI、两个安装脚本、Skill ZIP、`manifest.json`、`SHA256SUMS` 与第三方许可。源码提交及配套协议记录在 manifest 中。CLI 和 Skill 独立安装、独立卸载，按同一次发布验证版本配套。
+
+## 源码、API 与自动发布
+
+CLI 是独立 Go 模块，只依赖标准库。源码许可见 LICENSE。
+
+```sh
+go test ./...
+go build -o build/klib ./cmd/klib
+```
+
+公开 API 契约见 [OpenAPI](docs/openapi.json) 和 [接口说明](docs/api.md)。服务端仍负责身份、归属、额度和吊销校验；公开接口不等于匿名访问。
+
+更新 VERSION 与 README 的版本号，提交后推送 `cli-v<VERSION>` 标签，本仓库 Actions 会构建、测试三平台安装器，并用自身 GITHUB_TOKEN 发布 Release，无需私有仓库或跨仓库 Token。main 与 PR 执行测试，标签负责发行。
