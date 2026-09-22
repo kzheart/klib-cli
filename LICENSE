@@ -1,0 +1,14 @@
+Copyright (c) 2026 kzheart. All rights reserved.
+
+Permission is granted to download, install and use the distributed Klib CLI,
+installation scripts, and klib-cloud-development Skill to interact with Klib
+services. This distribution does not grant access to, or a license for, the
+private Klib Guard or server source code. All other rights are reserved.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR CLAIMS,
+DAMAGES OR OTHER LIABILITY ARISING FROM USE OF THE SOFTWARE.
+
+Third-party components remain governed by their respective licenses included
+in the distribution's LICENSES directory and third-party license archive.
